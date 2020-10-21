@@ -16,7 +16,7 @@ api = tweepy.API(auth)
 
 account_names = open('accounts.txt')
 
-account_lines = account_names.readline()
+account_lines = account_names.readlines()
 
 FILE_NAME = 'last_seen_id.txt'
 
@@ -40,12 +40,38 @@ def get_user_name(n):
     return user_name
 
 
-def main():
 
-    for x in range(5):
+def mybrain():
+    num_lines = sum(1 for line in account_names)
+    for i in num_lines:
+        user_name = get_user_name(i)    # get one by one account names from account.txt
+        tweets_from_user = api.user_timeline(screen_name=user_name, count=50, # scans maximum 50 tweets from an account
+                                             include_rts=True,
+                                             tweet_mode='extended')
+        for current_tweet in tweets_from_user[:n]:  # n will be asked from console to user
+            tweet_id = current_tweet.id
+            if current_tweet.favorite_count > num_o_likes: # num_of_likes to be asked from console
+                
+                # TODO MESSAGING ALGORITHM
 
-        name = get_user_name(x)
-        print(name)
 
-# TODO ACCOUNT NAMES TO THE LIST
-# READ BY LIST
+
+
+
+
+
+
+
+
+
+
+
+
+
+#def main():
+
+   # name = get_user_name()
+  #  print(name)
+
+
+# main()
