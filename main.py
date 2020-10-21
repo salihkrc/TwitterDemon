@@ -2,11 +2,26 @@ import tweepy
 import random
 from time import sleep
 
+print('############################ BEFORE WE START PLEASE GIVE ME SOME DETAILS #####################\n')
+print('\n')
+sleep(3)
+# CONSUMER_KEY = input('Please give your CONSUMER_KEY: ')
+# CONSUMER_SECRET = input('Please give your CONSUMER_SECRET: ')
+# ACCESS_KEY = input('Please give your ACCESS_KEY: ')
+# ACCESS_SECRET = input('Please give your ACCESS_SECRET: ')
+n_ = int
+
+n_ = input('How many tweets you want to scan per account ? : ')
+num_likes = input('How much likes must have a tweet (min) to send a DM to user ? : ')
+
 CONSUMER_KEY = ''
 CONSUMER_SECRET = ''
 
 ACCESS_KEY = ''
 ACCESS_SECRET = ''
+print('Initializing the connection...')
+sleep(5)
+
 
 print('*** TwitterDemon is Starting *** ')
 
@@ -40,23 +55,31 @@ def get_user_name(n):
     return user_name
 
 
-
-def mybrain():
-    num_lines = sum(1 for line in account_names)
-    for i in num_lines:
+def my_brain():
+    print('1')
+    n = n_
+    num_of_likes = num_likes
+    num_lines = len(account_names.readlines())
+    print(num_lines)
+    for i in range(2):
+        print('2')
         user_name = get_user_name(i)    # get one by one account names from account.txt
-        tweets_from_user = api.user_timeline(screen_name=user_name, count=50, # scans maximum 50 tweets from an account
-                                             include_rts=True,
+        tweets_from_user = api.user_timeline(screen_name=user_name, count=50,  # scans maximum 50 tweets from an account
                                              tweet_mode='extended')
-        for current_tweet in tweets_from_user[:n]:  # n will be asked from console to user
+        for current_tweet in tweets_from_user[:10]:  # n will be asked from console to user
             tweet_id = current_tweet.id
-            if current_tweet.favorite_count > num_o_likes: # num_of_likes to be asked from console
-                
-                # TODO MESSAGING ALGORITHM
+            if current_tweet.favorite_count >= 10 :  # num_of_likes to be asked from console
+                print('3')
+                c_user = current_tweet.user
+                c_user_id = c_user.id
+                msg_file = open('message.txt', mode='r')  # TODO create message.txt
+                message = msg_file.read()
+                msg_file.close()
+                direct_msg = api.send_direct_message(c_user_id, message)
 
 
 
-
+my_brain()
 
 
 
