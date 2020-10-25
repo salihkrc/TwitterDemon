@@ -13,12 +13,16 @@ print('        ############       ###\n'
       '             ##            ###\n')
 
 
+config_file = open('config.txt')
+configs = config_file.readlines()
 
-CONSUMER_KEY = ''
-CONSUMER_SECRET = ''
 
-ACCESS_KEY = ''
-ACCESS_SECRET = ''
+
+CONSUMER_KEY = configs[0].rstrip()
+CONSUMER_SECRET = configs[1].rstrip()
+
+ACCESS_KEY = configs[2].rstrip()
+ACCESS_SECRET = configs[3].rstrip()
 
 
 auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
@@ -43,7 +47,7 @@ def scan_rt():
     num_of_likes = int(num_likes)
     num_lines = open("accounts.txt").read().count('\n')
 
-    print(num_lines)
+    #print(num_lines)
 
     for i in range(num_lines):
         print('Now scanning tweets of the user : ')
@@ -65,7 +69,7 @@ def scan_rt():
 
 
             if fav_num >= num_of_likes and ((datetime.datetime.now() - creation_t).days <= 2)  :  # num_of_likes to be asked from console
-                print('-----------------------------------------------------------------')
+                print('\n')
                 print('%%%%% Tweet With Criteria FOUND! %%%%%\n')
                 print('ID OF TWEET: ')
                 print(current_tweet.retweeted_status.id)
@@ -73,23 +77,22 @@ def scan_rt():
                 print(current_tweet.retweeted_status.full_text)
                 print('Number of Favs: ')
                 print(current_tweet.retweeted_status.favorite_count)
-                try:
-                    api.create_favorite(current_tweet.retweeted_status.id) # likes the tweet
-                except:
-                    print("Already Favorited this tweet")
+
                 print('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
                 c_user = current_tweet.retweeted_status.user
+                c_user_name = c_user.screen_name
                 c_user_id = c_user.id
                 msg_file = open('message.txt', mode='r')  # TODO create message.txt
                 message = msg_file.read()
                 msg_file.close()
-
-
                 try:
-
-                    direct_msg = api.send_direct_message(c_user_id, message)
+                    api.send_direct_message(c_user_id, message)
                     print('Message Sent to the user!')
-                    print(c_user_id)
+                    print(c_user_name)
+                    try:
+                        api.create_favorite(current_tweet.retweeted_status.id)  # likes the tweet
+                    except:
+                        print("Already Favorited this tweet")
                     print('-----------------------------------------------------------------')
                     sleep(300)
                 except:
@@ -99,11 +102,58 @@ def scan_rt():
 
 def get_top():
     print('MODE 2 is activated!\n')
-    keyword = input('Please type the keyword to search for : ')
-    t_tweets = api.search(q=keyword, result_type='popular', tweet_mode='extended')
-    t_user = t_tweets[0].user
-    print(t_user.screen_name)
-    print(len(t_tweets))
+    keyw = input('Please give a keyword : ')
+    topn = input('Please Declare Top N tweets, N = ? : ')
+    topn = int(topn)
+    num_likes = input('How much likes must have a tweet (min) to send a DM to user ? : ')
+    num_of_likes = int(num_likes)
+
+    for tweet in tweepy.Cursor(api.search, q=keyw, result_type='popular').items(topn):
+        fav_num = 0
+        creation_t = 0
+        try:
+            fav_num = tweet.favorite_count
+            creation_t = tweet.created_at
+        except:
+            print('Found Tweet Which Is Not a RT!')
+            print('Skipping....')
+
+        if fav_num >= num_of_likes and (
+                (datetime.datetime.now() - creation_t).days <= 2):  # num_of_likes to be asked from console
+            print('\n')
+            print('%%%%% Tweet With Criteria FOUND! %%%%%\n')
+            print('ID OF TWEET: ')
+            print(tweet.id)
+            #print("Tweet's Content : ")
+            #print(tweet.full_text)
+            print('Number of Favs: ')
+            print(tweet.favorite_count)
+
+            print('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
+            c_user = tweet.user
+            c_user_name = c_user.screen_name
+            c_user_id = c_user.id
+            msg_file = open('message.txt', mode='r')  # TODO create message.txt
+            message = msg_file.read()
+            msg_file.close()
+            try:
+                api.send_direct_message(c_user_id, message)
+                print('Message Sent to the user!')
+                print(c_user_name)
+                try:
+                    api.create_favorite(tweet.id)  # likes the tweet
+                except:
+                    print("Already Favorited this tweet")
+                print('-----------------------------------------------------------------')
+                sleep(300)
+            except:
+                print('This User did not accept DMs!')
+                print('-----------------------------------------------------------------')
+
+
+
+
+
 
 
 
@@ -117,7 +167,7 @@ while True:
     print('############################ BEFORE WE START PLEASE GIVE ME SOME DETAILS #####################\n')
     mode_select = input('Please SELECT the Mode of Program :\n '
                         '1. Scan for RT from accounts\n'
-                        '2. Get top trending Tweet\ns'
+                        '2. Get top trending Tweets\n'
                         'Please Type 1 or 2 : ')
     sleep(3)
     print('Initializing the connection...')
@@ -133,4 +183,6 @@ while True:
         get_top()
     else:
         print('Wrong Selection')
+
+
 
